@@ -1,0 +1,28 @@
+services:
+  # Contenedor de Base de Datos
+  db:
+    image: mysql:8.0
+    container_name: todo-reservas-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: todo_reservas
+      MYSQL_ROOT_PASSWORD: todo_reservas_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./backend/sql:/docker-entrypoint-initdb.d # Carga automática del script SQL
+
+  # Contenedor de PHP + Apache (Backend)
+  backend:
+    image: php:8.2-apache
+    container_name: todo-reservas-backend
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - db
+    # Instalamos la extensión PDO MySQL necesaria para tu rúbrica
+    command: >
+      sh -c "docker-php-ext-install pdo pdo_mysql && apache2-foreground"

@@ -1,0 +1,38 @@
+/* Regla propia: Fondo con degradado deportivo */
+.container {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Regla propia: Efecto de elevación en la card */
+.card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Personalización del botón primario */
+.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    padding: 10px;
+    font-weight: 600;
+}
+
+/* Suavizar la transición de los colores de validación */
+.form-control.is-valid, .form-control.is-invalid {
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Evitar que el input-group rompa el feedback visual de Bootstrap */
+.input-group > .form-control.is-valid, .input-group > .form-control.is-invalid {
+    z-index: 3;
+}
+
+.background {
+ object-fit: cover;
+    filter: brightness(0.6);
+}

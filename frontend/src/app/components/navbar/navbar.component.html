@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" routerLink="/" (click)="isMenuCollapsed = true">TodoReservas</a>
+
+    <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed">
+      <div class="navbar-nav ms-auto align-items-center">
+
+        <a class="nav-link" routerLink="/pistas" routerLinkActive="active" (click)="isMenuCollapsed = true">Instalaciones</a>
+
+        <ng-container *ngIf="isLoggedIn">
+          <a class="nav-link" routerLink="/mis-reservas" routerLinkActive="active" (click)="isMenuCollapsed = true">Mis Reservas</a>
+
+          <a *ngIf="isAdmin" class="nav-link text-warning fw-bold" routerLink="/admin" routerLinkActive="active" (click)="isMenuCollapsed = true">
+            <i class="bi bi-shield-lock me-1"></i>Panel Admin
+          </a>
+
+          <button (click)="onLogout(); isMenuCollapsed = true" class="btn btn-sm btn-outline-danger ms-lg-3 my-2 my-lg-0">
+            Cerrar Sesión
+          </button>
+        </ng-container>
+
+        <a *ngIf="!isLoggedIn"
+           class="btn btn-primary btn-sm ms-lg-3 my-2 my-lg-0"
+           routerLink="/login"
+           (click)="isMenuCollapsed = true">
+           Acceso Clientes
+        </a>
+
+      </div>
+    </div>
+  </div>
+</nav>

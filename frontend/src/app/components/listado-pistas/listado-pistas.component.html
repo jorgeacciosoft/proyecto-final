@@ -1,0 +1,42 @@
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col text-center">
+      <h2 class="display-5 fw-bold text-primary">Nuestras Instalaciones</h2>
+      <p class="lead">Reserva tu espacio y empieza a entrenar hoy mismo.</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div class="row g-4" *ngIf="!loading">
+    <div class="col-12 col-md-6 col-lg-4" *ngFor="let pista of pistas">
+      <div class="card h-100 shadow-sm border-0 pista-card">
+        <img [src]="'http://localhost/uploads/' + (pista.imagen_url || 'campo-aguadulce.png')"
+     class="card-img-top p-3 rounded-4"
+     alt="Imagen de {{pista.nombre}}"
+     (error)="$any($event.target).src = 'assets/img/campo-aguadulce.png'">
+
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-info text-dark">{{pista.tipo}}</span>
+            <span class="fw-bold text-success">{{pista.precio_hora}}€/hora</span>
+          </div>
+          <h5 class="card-title fw-bold">{{pista.nombre}}</h5>
+          <p class="card-text text-muted">{{pista.descripcion}}</p>
+
+          <button (click)="irAReserva(pista.id)" class="btn btn-outline-primary mt-auto w-100 fw-bold">
+            <i class="bi bi-calendar-plus me-2"></i>Reservar ahora
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && pistas.length === 0" class="alert alert-warning text-center">
+    No hay instalaciones disponibles en este momento.
+  </div>
+</div>

@@ -1,0 +1,111 @@
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">Mis Reservas</h3>
+    <span *ngIf="reservas.length > 0" class="badge bg-dark rounded-pill px-3">
+      Total: {{ reservas.length }}
+    </span>
+  </div>
+
+  <div class="table-responsive bg-white shadow-sm rounded-4 p-3 d-none d-md-block" *ngIf="reservas.length > 0">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Instalación</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Estado</th>
+          <th *ngIf="hayReservasActivas" class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of reservas | slice:(paginaActual-1)*reservasPorPagina : paginaActual*reservasPorPagina">
+          <td><strong>{{ r.pista_nombre }}</strong></td>
+          <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+          <td>{{ r.hora_inicio }}</td>
+          <td>
+            <span class="badge" [ngClass]="r.estado === 'confirmada' ? 'bg-success' : 'bg-secondary'">
+              {{ r.estado | uppercase }}
+            </span>
+          </td>
+          <td *ngIf="hayReservasActivas" class="text-center">
+            <button *ngIf="r.estado === 'confirmada'"
+                    (click)="cancelar(r.id)"
+                    class="btn btn-sm btn-outline-danger shadow-sm">
+              <i class="bi bi-trash me-1"></i> Cancelar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-md-none" *ngIf="reservas.length > 0">
+    <div *ngFor="let r of reservas | slice:(paginaActual-1)*reservasPorPagina : paginaActual*reservasPorPagina"
+         class="card mb-3 border-0 shadow-sm p-3 border-start border-4"
+         [class.border-success]="r.estado === 'confirmada'"
+         [class.border-secondary]="r.estado !== 'confirmada'">
+
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted small fw-bold">Instalación:</span>
+        <span class="fw-bold">{{ r.pista_nombre }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted small fw-bold">Fecha:</span>
+        <span>{{ r.fecha | date:'dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-3">
+        <span class="text-muted small fw-bold">Hora:</span>
+        <span>{{ r.hora_inicio }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center border-top pt-3">
+        <span class="badge" [ngClass]="r.estado === 'confirmada' ? 'bg-success' : 'bg-secondary'">
+          {{ r.estado | uppercase }}
+        </span>
+
+        <button *ngIf="r.estado === 'confirmada'"
+                (click)="cancelar(r.id)"
+                class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-trash me-1"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="reservas.length > reservasPorPagina" class="d-flex justify-content-center mt-4">
+    <nav aria-label="Navegación de reservas">
+      <ul class="pagination shadow-sm">
+        <li class="page-item" [class.disabled]="paginaActual === 1">
+          <button class="page-link text-black" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+            <i class="bi bi-chevron-left"></i> Anterior
+          </button>
+        </li>
+
+        <li class="page-item active">
+          <span class="page-link px-4 bg-white text-black">
+            Página {{ paginaActual }} de {{ totalPaginas }}
+          </span>
+        </li>
+
+        <li class="page-item " [class.disabled]="paginaActual === totalPaginas">
+          <button class="page-link text-black" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+            Siguiente <i class="bi bi-chevron-right"></i>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div *ngIf="reservas.length === 0" class="text-center py-5 bg-white shadow-sm rounded-4 mt-3">
+    <div class="mb-3">
+      <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+    </div>
+    <h4 class="text-dark">No tienes reservas</h4>
+    <p class="text-muted mb-4">Parece que aún no has reservado ninguna pista.</p>
+    <button (click)="verInstalaciones()" class="btn btn-primary btn-lg px-5 shadow">
+      Explorar Instalaciones
+    </button>
+  </div>
+</div>

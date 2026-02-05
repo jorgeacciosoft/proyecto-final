@@ -1,0 +1,14 @@
+/* Suavizar la transición de los colores de validación */
+.form-control.is-valid, .form-control.is-invalid {
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Evitar que el input-group rompa el feedback visual de Bootstrap */
+.input-group > .form-control.is-valid, .input-group > .form-control.is-invalid {
+    z-index: 3;
+}
+
+.background {
+ object-fit: cover;
+    filter: brightness(0.6) !important;
+}

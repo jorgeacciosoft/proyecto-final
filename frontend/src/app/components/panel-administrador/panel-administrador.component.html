@@ -1,0 +1,202 @@
+<div class="container-fluid py-4">
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Panel de Administración Central</h5>
+      <span class="badge bg-warning text-dark px-3">Sesión de Administrador</span>
+    </div>
+
+    <div class="card-body">
+      <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+          <button class="nav-link fw-bold" [class.active]="pestanaActiva === 'reservas'" (click)="cambiarPestana('reservas')" type="button">
+            <i class="bi bi-calendar-check me-2"></i>Gestión de Reservas
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link fw-bold" [class.active]="pestanaActiva === 'usuarios'" (click)="cambiarPestana('usuarios')" type="button">
+            <i class="bi bi-people me-2"></i>Gestión de Usuarios
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link fw-bold" [class.active]="pestanaActiva === 'instalaciones'" (click)="cambiarPestana('instalaciones')" type="button">
+            <i class="bi bi-building me-2"></i>Gestión de Instalaciones
+          </button>
+        </li>
+      </ul>
+
+      <div [ngSwitch]="pestanaActiva">
+
+        <div *ngSwitchCase="'reservas'" class="animate-fade-in">
+          <div class="table-responsive d-none d-md-block">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Usuario</th>
+                  <th>Instalación</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Estado</th>
+                  <th *ngIf="hayReservasActivas" class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of todasReservas | slice:(paginaActual-1)*reservasPorPagina : paginaActual*reservasPorPagina">
+                  <td><strong>{{ r.usuario_nombre }}</strong></td>
+                  <td>{{ r.pista_nombre }}</td>
+                  <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ r.hora_inicio }}</td>
+                  <td>
+                    <span [class]="r.estado === 'confirmada' ? 'badge bg-success-subtle text-success' : 'badge bg-danger-subtle text-danger'">
+                      {{ r.estado | uppercase }}
+                    </span>
+                  </td>
+                  <td *ngIf="hayReservasActivas" class="text-end">
+                    <button *ngIf="r.estado === 'confirmada'" (click)="eliminarReservaAdmin(r.id)" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i> Cancelar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="d-md-none">
+            <div *ngFor="let r of todasReservas | slice:(paginaActual-1)*reservasPorPagina : paginaActual*reservasPorPagina"
+                 class="card mb-3 border-0 shadow-sm p-3 border-start border-4"
+                 [class.border-success]="r.estado === 'confirmada'"
+                 [class.border-danger]="r.estado !== 'confirmada'">
+                 <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small fw-bold">Usuario:</span>
+                    <span class="fw-bold">{{ r.usuario_nombre }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small fw-bold">Instalación:</span>
+                    <span>{{ r.pista_nombre }}</span>
+                  </div>
+              <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                <span [class]="r.estado === 'confirmada' ? 'badge bg-success' : 'badge bg-danger'" class="text-uppercase">{{ r.estado }}</span>
+                <button *ngIf="r.estado === 'confirmada'" (click)="eliminarReservaAdmin(r.id)" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="todasReservas.length > reservasPorPagina" class="d-flex justify-content-center mt-4">
+            <ng-container *ngTemplateOutlet="controlesPaginacion; context: { total: todasReservas.length }"></ng-container>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="'usuarios'" class="animate-fade-in">
+          <div class="table-responsive d-none d-md-block">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of listaUsuarios | slice:(paginaActual-1)*reservasPorPagina : paginaActual*reservasPorPagina">
+                  <td>{{ u.nombre }}</td>
+                  <td>{{ u.email }}</td>
+                  <td>
+                    <span [class]="u.rol === 'admin' ? 'badge bg-primary' : 'badge bg-secondary'">
+                      {{ u.rol | uppercase }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end gap-2">
+                      <button (click)="modificarUsuario(u.id, u.nombre, u.email, u.rol)" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
+                      <button (click)="eliminarUsuario(u.id)" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="d-md-none">
+            <div *ngFor="let u of listaUsuarios | slice:(paginaActual-1)*reservasPorPagina : paginaActual*reservasPorPagina" class="card mb-3 border-0 shadow-sm p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0 fw-bold">{{ u.nombre }}</h6>
+                <span [class]="u.rol === 'admin' ? 'badge bg-primary' : 'badge bg-secondary'">{{ u.rol | uppercase }}</span>
+              </div>
+              <p class="text-muted small mb-3">{{ u.email }}</p>
+              <div class="d-flex gap-2">
+                <button (click)="modificarUsuario(u.id, u.nombre, u.email, u.rol)" class="btn btn-outline-primary btn-sm w-50">Editar</button>
+                <button (click)="eliminarUsuario(u.id)" class="btn btn-danger btn-sm w-50">Borrar</button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="listaUsuarios.length > reservasPorPagina" class="d-flex justify-content-center mt-4">
+            <ng-container *ngTemplateOutlet="controlesPaginacion; context: { total: listaUsuarios.length }"></ng-container>
+          </div>
+        </div>
+
+
+        <!-- INSTALACIONES -->
+        <div *ngSwitchCase="'instalaciones'" class="animate-fade-in">
+  <button class="btn btn-success mb-4" (click)="prepararNuevaInstalacion()">
+    <i class="bi bi-plus-circle me-2"></i>Nueva Instalación
+  </button>
+
+  <div class="row g-4"> <div class="col-12 col-md-6 col-lg-4" *ngFor="let pista of todasPistas | slice:(paginaActual-1)*reservasPorPagina : paginaActual*reservasPorPagina">
+      <div class="card h-100 shadow-sm border-0 pista-card">
+
+        <img [src]="UPLOADS_URL + (pista.imagen_url || 'campo-aguadulce.png')"
+             class="card-img-top p-3 rounded-4"
+             alt="Imagen de {{pista.nombre}}"
+             style="height: 220px; object-fit: cover;"
+             (error)="$any($event.target).src = 'assets/img/campo-aguadulce.png'">
+
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-info text-dark">{{pista.tipo}}</span>
+            <span class="fw-bold text-success">{{pista.precio_hora}}€/hora</span>
+          </div>
+
+          <h5 class="card-title fw-bold">{{ pista.nombre }}</h5>
+          <p class="card-text text-muted small">{{ pista.descripcion }}</p>
+
+          <div class="d-flex gap-2 mt-auto pt-3">
+            <button (click)="editarInstalacion(pista)" class="btn btn-sm btn-outline-primary w-50 fw-bold">
+              <i class="bi bi-pencil-square me-1"></i> Modificar
+            </button>
+            <button (click)="eliminarInstalacion(pista.id)" class="btn btn-sm btn-danger w-50">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="todasPistas.length > reservasPorPagina" class="d-flex justify-content-center mt-4">
+    <ng-container *ngTemplateOutlet="controlesPaginacion; context: { total: todasPistas.length }"></ng-container>
+  </div>
+</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #controlesPaginacion let-total="total">
+  <nav aria-label="Navegación admin">
+    <ul class="pagination shadow-sm">
+      <li class="page-item" [class.disabled]="paginaActual === 1">
+        <button class="page-link text-black" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+          <i class="bi bi-chevron-left"></i> Anterior
+        </button>
+      </li>
+      <li class="page-item active">
+        <span class="page-link px-4 bg-white text-black border-0">
+          Página {{ paginaActual }} de {{ totalPaginas}}
+        </span>
+      </li>
+      <li class="page-item" [class.disabled]="paginaActual * reservasPorPagina >= total">
+        <button class="page-link text-black" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual * reservasPorPagina >= total">
+          Siguiente <i class="bi bi-chevron-right"></i>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</ng-template>

@@ -1,0 +1,61 @@
+<div class="container-fluid vh-100 p-0">
+  <div class="row g-0 vh-100">
+    <div class="col-md-6 col-lg-7 d-none d-md-block position-relative">
+
+      <img src="assets/img/logueo.png" class="w-100 h-100 object-fit-cover background" alt="Background">
+    </div>
+
+    <div class="col-md-6 col-lg-5 d-flex align-items-center justify-content-center bg-light">
+      <div class="card border-0 bg-transparent" style="max-width: 400px; width: 90%;">
+        <div class="text-center mb-4">
+          <i class="bi bi-person-circle fs-1 text-primary"></i>
+          <h2 class="fw-bold">Iniciar sesión</h2>
+          <p class="text-muted small">Accede con tus datos para continuar.</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Correo Electrónico</label>
+            <div class="input-group has-validation">
+              <input type="email" formControlName="email" class="form-control form-control-lg shadow-sm"
+                     [class.is-valid]="loginForm.get('email')?.valid"
+                     [class.is-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+                     placeholder="ejemplo@correo.com">
+              <div class="invalid-feedback">
+  Introduce un email válido (ej: nombre&#64;dominio.com).
+</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Contraseña</label>
+            <div class="input-group has-validation">
+              <input type="password" formControlName="password" class="form-control form-control-lg shadow-sm"
+                     [class.is-valid]="loginForm.get('password')?.valid"
+                     [class.is-invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+                     placeholder="••••••">
+              <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+            </div>
+          </div>
+
+          <div *ngIf="errorMessage" class="alert alert-danger p-2 small animate__animated animate__shakeX">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage }}
+          </div>
+
+          <button type="submit" [disabled]="loginForm.invalid" class="btn btn-primary btn-lg w-100 mt-3 shadow fw-bold">
+            Entrar al sistema
+          </button>
+        </form>
+
+        <div class="text-center mt-4">
+          <small class="text-muted">
+            ¿Aún no tienes cuenta?
+            <a routerLink="/registro" class="text-primary fw-bold text-decoration-none">Regístrate aquí</a>
+          </small>
+        </div>
+
+        <p class="text-center text-muted mt-5 small">© 2026 TodoReservas</p>
+      </div>
+    </div>
+  </div>
+</div>
