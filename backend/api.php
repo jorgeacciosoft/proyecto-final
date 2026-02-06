@@ -15,7 +15,7 @@ require_once 'models/Instalacion.php';
 require_once 'models/Reserva.php';
 
 function checkAuth() {
-    if (!isset($_SESSION['user_id'])) {
+    if (!isset($_SESSION['usuario_id'])) {
         http_response_code(403);
         echo json_encode(["status" => "error", "message" => "No autorizado"]);
         exit;
@@ -34,38 +34,57 @@ switch($action) {
         echo json_encode($instalacionModel->leerTodas());
         break;
 
-    case 'crear_reserva':
-        checkAuth();
-        // Verificamos que los datos existan antes de usarlos para evitar el Warning
-        if (!isset($data->instalacion_id) || !isset($data->fecha) || !isset($data->hora_inicio)) {
-            http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Datos incompletos"]);
-            break;
-        }
-        
-        $resultado = $reservaModel->crear(
-            $_SESSION['user_id'], 
-            $data->instalacion_id, 
-            $data->fecha, 
-            $data->hora_inicio
-        );
-        echo json_encode($resultado);
-        break;
-
     case 'mis_reservas':
         checkAuth();
-        echo json_encode($reservaModel->listarPorUsuario($_SESSION['user_id']));
+        echo json_encode($reservaModel->listarPorUsuario($_SESSION['usuario_id']));
         break;
 
     case 'cancelar_reserva':
-        checkAuth();
-        if(!isset($data->reserva_id)) {
-            echo json_encode(["status" => "error", "message" => "ID de reserva ausente"]);
-            break;
-        }
-        $exito = $reservaModel->cancelar($data->reserva_id);
-        echo json_encode(["status" => $exito ? "success" : "error"]);
+    checkAuth();
+    // Aceptamos el ID desde JSON (`reserva_id`) o desde la querystring (`id`) por compatibilidad
+    $id_reserva = $data->reserva_id ?? $_GET['id'] ?? null;
+
+    if (!$id_reserva) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "ID de reserva ausente"]);
         break;
+    }
+
+    // Obtenemos la reserva usando el modelo
+    $reserva = $reservaModel->obtenerPorId($id_reserva);
+
+    if (!$reserva) {
+        http_response_code(404);
+        echo json_encode(["status" => "error", "message" => "Reserva no encontrada"]);
+        break;
+    }
+
+    $fecha_reserva = new DateTime($reserva['fecha']);
+    $hoy = new DateTime();
+
+    // Si la fecha ya pasó o faltan menos de 2 días, rechazamos
+    if ($fecha_reserva < $hoy) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "La reserva ya ha pasado"]);
+        break;
+    }
+
+    $intervalo = $hoy->diff($fecha_reserva);
+    if ($intervalo->days < 2) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "No se puede cancelar con menos de 48h de antelación"]);
+        break;
+    }
+
+    // Usamos el método del modelo para marcar como cancelada
+    $exito = $reservaModel->cancelar($id_reserva);
+    if ($exito) {
+        echo json_encode(["status" => "success", "message" => "Reserva cancelada"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["status" => "error", "message" => "No se pudo cancelar la reserva"]);
+    }
+    break;
 
     case 'todas_reservas':
         checkAuth();
@@ -151,7 +170,7 @@ switch($action) {
         }
         require_once 'models/Usuario.php';
         $usuarioModel = new Usuario();
-        $exito = $usuarioModel->modificar($_SESSION['user_id'], $data->nombre, $data->email, $data->password, null);
+        $exito = $usuarioModel->modificar($_SESSION['usuario_id'], $data->nombre, $data->email, $data->password, null);
         echo json_encode(["status" => $exito ? "success" : "error"]);
         break;
     default:
@@ -262,5 +281,68 @@ case 'eliminar_pista':
     $exito = $instalacionModel->eliminarPorId($id_eliminar);
     echo json_encode(["status" => $exito ? "success" : "error"]);
     break;
+
+    case 'obtener_instalacion':
+        checkAuth();
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            echo json_encode(["status" => "error", "message" => "ID no proporcionado"]);
+            exit;
+        }
+        $instalacion = $instalacionModel->obtenerPorId($id);
+        if (!$instalacion) {
+            http_response_code(404);
+            echo json_encode(["status" => "error", "message" => "Instalación no encontrada"]);
+            break;
+        }
+        echo json_encode($instalacion);
+        break;
+
+    case 'crear_reserva':
+    checkAuth();
+    
+    // Forzamos la limpieza del buffer para que solo salga el JSON
+    if (ob_get_length()) ob_clean();
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    
+    // PRUEBA DE FUEGO: 
+    // Si $_SESSION['usuario_id'] está vacío, el sistema fallará.
+    // Vamos a ver qué tiene la sesión realmente.
+    $user_id = $_SESSION['usuario_id'] ?? $_SESSION['id'] ?? null;
+    
+    if (!$user_id) {
+        // Si entra aquí, es que el Login NO guardó bien el ID o la sesión se perdió
+        echo json_encode([
+            "status" => "error", 
+            "message" => "No hay usuario en la sesión. Sesión actual: " . json_encode($_SESSION)
+        ]);
+        exit;
+    }
+
+    $instalacion_id = $data['instalacion_id'];
+    $fecha = $data['fecha'];
+    $hora_inicio = $data['hora']; 
+
+    try {
+        // 3. Usamos los nombres exactos de tu tabla: usuario_id, instalacion_id, fecha, hora_inicio, estado
+        $stmt = $pdo->prepare("INSERT INTO reservas (usuario_id, instalacion_id, fecha, hora_inicio, estado) VALUES (?, ?, ?, ?, 'confirmada')");
+        $stmt->execute([
+            $user_id, 
+            $instalacion_id, 
+            $fecha, 
+            $hora_inicio, 
+            'confirmada'
+        ]);
+        
+        echo json_encode(["status" => "success", "message" => "Reserva guardada correctamente"]);
+        exit; // Cerramos aquí para evitar que se envíe nada más
+
+    } catch (PDOException $e) {
+        // 4. Si la base de datos da error (ej: el usuario no existe), lo enviamos como JSON
+        echo json_encode(["status" => "error", "message" => "Error de Base de Datos: " . $e->getMessage()]);
+        exit;
+    }
 }
+
 ?>

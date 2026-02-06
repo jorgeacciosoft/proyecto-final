@@ -67,4 +67,12 @@ class Instalacion {
         ]);
     }
 
+    // Obtener instalación por ID
+    public function obtenerPorId($id) {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id LIMIT 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
 }

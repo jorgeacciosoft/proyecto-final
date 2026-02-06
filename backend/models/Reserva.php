@@ -17,7 +17,7 @@ class Reserva
     {
         // Primero verificamos si ya existe una reserva a esa hora
         $check = "SELECT id FROM " . $this->table . " 
-                  WHERE instalacion_id = :inst AND fecha = :fecha AND hora_inicio = :hora AND estado = 'confirmada'";
+                WHERE instalacion_id = :inst AND fecha = :fecha AND hora_inicio = :hora AND estado = 'confirmada'";
         $stmtCheck = $this->db->prepare($check);
         $stmtCheck->execute([
             ':inst' => $instalacion_id,
@@ -31,7 +31,7 @@ class Reserva
 
         // Si está libre, insertamos
         $query = "INSERT INTO " . $this->table . " (usuario_id, instalacion_id, fecha, hora_inicio) 
-                  VALUES (:user, :inst, :fecha, :hora)";
+                VALUES (:user, :inst, :fecha, :hora)";
         $stmt = $this->db->prepare($query);
 
         if ($stmt->execute([
@@ -49,9 +49,9 @@ class Reserva
     public function listarPorUsuario($usuario_id)
     {
         $query = "SELECT r.*, i.nombre as pista_nombre 
-                  FROM " . $this->table . " r
-                  JOIN instalaciones i ON r.instalacion_id = i.id
-                  WHERE r.usuario_id = :user ORDER BY r.fecha DESC";
+                FROM " . $this->table . " r
+                JOIN instalaciones i ON r.instalacion_id = i.id
+                WHERE r.usuario_id = :user ORDER BY r.fecha DESC";
         $stmt = $this->db->prepare($query);
         $stmt->execute([':user' => $usuario_id]);
         return $stmt->fetchAll();
@@ -64,13 +64,22 @@ class Reserva
         $stmt = $this->db->prepare($query);
         return $stmt->execute([':id' => $id]);
     }
+
+    // Obtener reserva por ID
+    public function obtenerPorId($id)
+    {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id LIMIT 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
     // Listar todas las reservas (Para admin)
     public function listarTodasAdmin() {
         $query = "SELECT r.*, u.nombre as usuario_nombre, i.nombre as pista_nombre 
-                  FROM reservas r
-                  JOIN usuarios u ON r.usuario_id = u.id
-                  JOIN instalaciones i ON r.instalacion_id = i.id
-                  ORDER BY r.fecha DESC, r.hora_inicio DESC";
+                FROM reservas r
+                JOIN usuarios u ON r.usuario_id = u.id
+                JOIN instalaciones i ON r.instalacion_id = i.id
+                ORDER BY r.fecha DESC, r.hora_inicio DESC";
         
         $stmt = $this->db->prepare($query);
         $stmt->execute();

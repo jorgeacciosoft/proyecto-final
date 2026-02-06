@@ -27,12 +27,17 @@
               {{ r.estado | uppercase }}
             </span>
           </td>
-          <td *ngIf="hayReservasActivas" class="text-center">
-            <button *ngIf="r.estado === 'confirmada'"
+          <td *ngIf="hayReservasActivas" class="text-end">
+            <button *ngIf="r.estado === 'confirmada' && esCancelable(r.fecha)"
                     (click)="cancelar(r.id)"
                     class="btn btn-sm btn-outline-danger shadow-sm">
               <i class="bi bi-trash me-1"></i> Cancelar
             </button>
+
+            <span *ngIf="r.estado === 'confirmada' && !esCancelable(r.fecha)"
+                  class="text-muted small fw-light italic">
+              <i class="bi bi-info-circle me-1"></i>Fuera de plazo
+            </span>
           </td>
         </tr>
       </tbody>
@@ -65,11 +70,16 @@
           {{ r.estado | uppercase }}
         </span>
 
-        <button *ngIf="r.estado === 'confirmada'"
+        <button *ngIf="r.estado === 'confirmada' && esCancelable(r.fecha)"
                 (click)="cancelar(r.id)"
                 class="btn btn-sm btn-outline-danger">
           <i class="bi bi-trash me-1"></i> Cancelar
         </button>
+
+        <span *ngIf="r.estado === 'confirmada' && !esCancelable(r.fecha)"
+              class="text-muted small">
+          <i class="bi bi-lock-fill me-1"></i>No cancelable
+        </span>
       </div>
     </div>
   </div>

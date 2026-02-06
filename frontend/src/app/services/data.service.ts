@@ -82,4 +82,7 @@ export class DataService {
     return this.http.post(`${this.API_URL}?action=modificar_pista`, formData, { withCredentials: true });
   }
 
+  obtenerInstalacionPorId(id: number): Observable<any> {
+  return this.http.get(`${this.API_URL}?action=obtener_instalacion&id=${id}`, { withCredentials: true });
+}
 }

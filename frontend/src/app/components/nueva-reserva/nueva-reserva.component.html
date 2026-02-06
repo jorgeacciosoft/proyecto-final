@@ -1,32 +1,45 @@
 <div class="container py-5">
-  <div class="card mx-auto shadow-sm" style="max-width: 600px;">
-    <div class="card-header bg-primary text-white py-3">
-      <h4 class="mb-0"><i class="bi bi-clock-history me-2"></i>Configura tu Reserva</h4>
+  <div class="card mx-auto shadow-sm border-0 rounded-4" style="max-width: 600px;">
+    <div class="card-header bg-primary text-white py-3 rounded-top-4">
+      <h4 class="mb-0 text-center"><i class="bi bi-clock-history me-2"></i>Configura tu Reserva</h4>
     </div>
     <div class="card-body p-4">
+      <div class="text-center mb-4" *ngIf="pista">
+        <h5 class="text-dark fw-bold mb-1">{{ pista.nombre }}</h5>
+        <span class="badge bg-light text-primary border border-primary px-3">{{ pista.precio_hora | currency:'EUR' }} / hora</span>
+      </div>
+
       <form [formGroup]="reservaForm" (ngSubmit)="confirmarReserva()">
         <div class="mb-3">
-          <label class="form-label fw-bold">Fecha del evento</label>
-          <input type="date" formControlName="fecha" class="form-control form-control-lg">
+          <label class="form-label fw-bold">¿Qué día quieres venir?</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-calendar-event"></i></span>
+            <input type="date" formControlName="fecha" class="form-control form-control-lg border-start-0">
+          </div>
         </div>
 
         <div class="mb-4">
-          <label class="form-label fw-bold">Selecciona Hora (Bloques de 1h)</label>
-          <select formControlName="hora" class="form-select form-select-lg">
-            <option value="">Selecciona un horario...</option>
-            <option value="09:00">09:00 - 10:00</option>
-            <option value="10:00">10:00 - 11:00</option>
-            <option value="11:00">11:00 - 12:00</option>
-            <option value="12:00">12:00 - 13:00</option>
-            <option value="13:00">13:00 - 14:00</option>
-            <option value="14:00">14:00 - 15:00</option>
-            <option value="17:00">17:00 - 18:00</option>
-            <option value="18:00">18:00 - 19:00</option>
-            <option value="19:00">19:00 - 20:00</option>
-            <option value="20:00">20:00 - 21:00</option>
-            <option value="21:00">21:00 - 22:00</option>
-          </select>
-          <small class="text-muted">Solo se permiten reservas en horas en punto.</small>
+          <label class="form-label fw-bold">Selecciona el horario</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-alarm"></i></span>
+            <select formControlName="hora" class="form-select form-select-lg border-start-0">
+              <option value="">Selecciona un bloque de 1h...</option>
+              <option value="09:00">09:00 - 10:00</option>
+              <option value="10:00">10:00 - 11:00</option>
+              <option value="11:00">11:00 - 12:00</option>
+              <option value="12:00">12:00 - 13:00</option>
+              <option value="13:00">13:00 - 14:00</option>
+              <option value="14:00">14:00 - 15:00</option>
+              <option value="17:00">17:00 - 18:00</option>
+              <option value="18:00">18:00 - 19:00</option>
+              <option value="19:00">19:00 - 20:00</option>
+              <option value="20:00">20:00 - 21:00</option>
+              <option value="21:00">21:00 - 22:00</option>
+            </select>
+          </div>
+          <small class="text-muted d-block mt-2">
+            <i class="bi bi-info-circle me-1"></i>Solo se permiten reservas en horas en punto.
+          </small>
         </div>
 
         <div *ngIf="mensaje" class="alert alert-warning border-0 shadow-sm">
@@ -34,14 +47,76 @@
         </div>
 
         <div class="d-grid gap-2">
-          <button type="submit" [disabled]="reservaForm.invalid" class="btn btn-primary btn-lg">
-            Confirmar y Pagar en Pista
+          <button type="submit" [disabled]="reservaForm.invalid" class="btn btn-primary btn-lg shadow-sm py-3 fw-bold">
+            Continuar al Pago <i class="bi bi-arrow-right ms-2"></i>
           </button>
-          <button type="button" [disabled]="reservaForm.invalid"  (click)="cancelarReserva()" class="btn btn-outline-secondary btn-lg bg-danger text-white">
-    Cancelar
-  </button>
+          <button type="button" (click)="cancelarReserva()" class="btn btn-link text-muted mt-2">
+            Volver al listado
+          </button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="pagoModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-dark text-white rounded-top-4 py-3">
+        <h5 class="modal-title"><i class="bi bi-shield-lock me-2"></i>Pago Seguro</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+
+        <div class="bg-light p-3 rounded-3 mb-4 border" *ngIf="pista && reservaTemporal">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted small">Instalación:</span>
+                <span class="fw-bold">{{ pista.nombre }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted small">Fecha y Hora:</span>
+                <span class="fw-bold text-end">{{ reservaTemporal.fecha | date:'dd/MM/yyyy' }} a las {{ reservaTemporal.hora }}h</span>
+            </div>
+            <hr class="my-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Total a pagar:</span>
+                <span class="h4 mb-0 fw-bold text-primary">{{ pista.precio_hora | currency:'EUR' }}</span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-uppercase">Número de Tarjeta</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+            <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-7">
+            <label class="form-label small fw-bold text-uppercase">Expiración</label>
+            <input type="text" class="form-control" placeholder="MM/AA" maxlength="5">
+          </div>
+          <div class="col-5">
+            <label class="form-label small fw-bold text-uppercase">CVC</label>
+            <input type="text" class="form-control" placeholder="123" maxlength="3">
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" height="15" class="me-3 opacity-75">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" height="20" class="opacity-75">
+            <p class="mt-3 x-small text-muted mb-0" style="font-size: 0.7rem;">
+                Al confirmar, aceptas el cargo automático de <strong>{{ pista?.precio | currency:'EUR' }}</strong>.
+            </p>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0 p-3 pt-0">
+        <button type="button" class="btn btn-success btn-lg w-100 shadow rounded-3 py-3 fw-bold" (click)="procesarPago()">
+          Pagar y Finalizar Reserva
+        </button>
+      </div>
     </div>
   </div>
 </div>

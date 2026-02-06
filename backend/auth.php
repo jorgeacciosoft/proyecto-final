@@ -32,7 +32,7 @@ switch($action) {
         $user = $userModel->login($data->email, $data->password);
 
         if($user) {
-            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['usuario_id'] = $user['id'];
             $_SESSION['rol'] = $user['rol'];
             echo json_encode(["status" => "success", "user" => $user]);
         } else {
@@ -65,7 +65,7 @@ switch($action) {
     break;
 
     case 'verificar_sesion':
-        if(isset($_SESSION['user_id'])) {
+        if(isset($_SESSION['usuario_id'])) {
             echo json_encode(["isLoggedIn" => true, "rol" => $_SESSION['rol']]);
         } else {
             echo json_encode(["isLoggedIn" => false]);
