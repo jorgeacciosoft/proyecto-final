@@ -1,6 +1,6 @@
-export const environmentProd = {
+export const environment = {
   production: true,
-  apiUrl: 'http://192.168.1.19/api.php',
-  uploadsUrl: 'http://192.168.1.19/uploads/',
-  authUrl: 'http://192.168.1.19/auth.php'
+  apiUrl: 'http://todo-reservas.rf.gd/api.php',
+  uploadsUrl: 'http://todo-reservas.rf.gd/uploads/',
+  authUrl: 'http://todo-reservas.rf.gd/auth.php'
 };

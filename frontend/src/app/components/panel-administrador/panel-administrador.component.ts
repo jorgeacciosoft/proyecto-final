@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { RouterLink } from "@angular/router";
 import { environment } from '../../../environments/environments';
-import { environmentProd } from '../../../environments/environments.prod';
 
 
 
