@@ -1,0 +1,151 @@
+<div class="container py-4 py-md-5">
+  <div class="d-flex justify-content-between align-items-start align-items-md-center flex-column-reverse flex-md-row gap-3 mb-4">
+    <h2 class="fw-bold mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Estadísticas de Ingresos</h2>
+    <button class="btn btn-outline-secondary btn-sm btn-back" (click)="volverAlPanel()">
+      <i class="bi bi-arrow-left me-1"></i>Volver al Panel
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-muted">Cargando estadísticas...</p>
+  </div>
+
+  <div *ngIf="!cargando && estadisticas">
+    <!-- Tarjetas de resumen -->
+    <div class="row g-3 g-md-4 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+          <div class="card-body text-center p-2 p-md-3">
+            <i class="bi bi-cash-coin fs-1 mb-2"></i>
+            <div class="text-uppercase small mb-1 opacity-75 text-white">Ingresos de Hoy</div>
+            <h2 class="mb-0 fw-bold fs-5 fs-md-2">{{ estadisticas.hoy | currency:'EUR' }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 bg-success text-white">
+          <div class="card-body text-center p-2 p-md-3">
+            <i class="bi bi-calendar-month fs-1 mb-2"></i>
+            <div class="text-uppercase small mb-1 opacity-75 text-white">Mes Actual</div>
+            <h2 class="mb-0 fw-bold fs-5 fs-md-2">{{ estadisticas.mes_actual | currency:'EUR' }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 bg-info text-white">
+          <div class="card-body text-center p-2 p-md-3 text-white">
+            <i class="bi bi-piggy-bank fs-1 mb-2"></i>
+            <div class="text-uppercase small mb-1 opacity-75 texto-blanco-card">Total Acumulado</div>
+            <h2 class="mb-0 fw-bold fs-5 fs-md-2">{{ estadisticas.total | currency:'EUR' }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 bg-warning text-dark">
+          <div class="card-body text-center p-2 p-md-3">
+            <i class="bi bi-arrow-counterclockwise fs-1 mb-2"></i>
+            <div class="text-uppercase small mb-1 opacity-75">Reembolsado</div>
+            <h2 class="mb-0 fw-bold fs-5 fs-md-2">{{ estadisticas.total_reembolsado | currency:'EUR' }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ingresos por mes -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <div class="mb-0 fw-bold"><i class="bi bi-bar-chart-line me-2"></i>Ingresos por Mes (Últimos 6 meses)</div>
+      </div>
+      <div class="card-body p-2 p-md-3">
+        <div *ngIf="estadisticas.por_mes && estadisticas.por_mes.length > 0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle table-sm">
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th class="text-end">Ingresos</th>
+                  <th class="d-none d-md-table-cell" width="40%">Visualización</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let mes of estadisticas.por_mes">
+                  <td class="fw-semibold small">{{ mes.mes_nombre }}</td>
+                  <td class="text-end fw-bold text-success small">{{ mes.total | currency:'EUR' }}</td>
+                  <td class="d-none d-md-table-cell">
+                    <div class="progress" style="height: 20px;">
+                      <div
+                        class="progress-bar bg-success"
+                        role="progressbar"
+                        [style.width.%]="(mes.total / estadisticas.total) * 100"
+                        [attr.aria-valuenow]="mes.total"
+                        aria-valuemin="0"
+                        aria-label="estado gráfico ingreso por mes"
+                        [attr.aria-valuemax]="estadisticas.total"
+                        style="font-size: 0.75rem;">
+                        {{ (mes.total / estadisticas.total * 100).toFixed(1) }}%
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!estadisticas.por_mes || estadisticas.por_mes.length === 0" class="text-center py-4 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+          <p>No hay datos de meses anteriores</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ingresos por instalación -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <div class="mb-0 fw-bold size-title"><i class="bi bi-building me-2"></i>Ingresos por Instalación</div>
+      </div>
+      <div class="card-body">
+        <div *ngIf="estadisticas.por_instalacion && estadisticas.por_instalacion.length > 0">
+          <div class="row g-2 g-md-3">
+            <div class="col-12 col-md-6" *ngFor="let instalacion of estadisticas.por_instalacion">
+              <div class="card bg-light border-0 h-100">
+                <div class="card-body p-2 p-md-3">
+                  <div class="d-flex justify-content-between align-items-start mb-2 flex-column flex-sm-row gap-2">
+                    <div>
+                      <div class="fw-bold mb-1 text-break">{{ instalacion.nombre }}</div>
+                      <small class="text-muted">{{ instalacion.cantidad_reservas }} reservas</small>
+                    </div>
+                    <div class="mb-0 money-info fw-bold text-nowrap">{{ instalacion.total | currency:'EUR' }}</div>
+                  </div>
+                  <div class="progress" style="height: 8px;">
+                    <div
+                      class="progress-bar bg-primary"
+                      role="progressbar"
+                      [style.width.%]="(instalacion.total / estadisticas.total) * 100"
+                      [attr.aria-valuenow]="instalacion.total"
+                      aria-valuemin="0"
+                      aria-label="estado gráfico ingreso por instalación"
+                      [attr.aria-valuemax]="estadisticas.total">
+                    </div>
+                  </div>
+                  <small class="text-muted mt-1 d-block">
+                    {{ (instalacion.total / estadisticas.total * 100).toFixed(1) }}% del total
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!estadisticas.por_instalacion || estadisticas.por_instalacion.length === 0" class="text-center py-4 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+          <p>No hay datos de instalaciones</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

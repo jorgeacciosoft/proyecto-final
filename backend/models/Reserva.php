@@ -40,7 +40,12 @@ class Reserva
             ':fecha' => $fecha,
             ':hora' => $hora
         ])) {
-            return ["status" => "success", "message" => "Reserva realizada con éxito."];
+            // Devolvemos el ID de la reserva creada para poder registrar el pago
+            return [
+                "status" => "success", 
+                "message" => "Reserva realizada con éxito.",
+                "reserva_id" => $this->db->lastInsertId()
+            ];
         }
         return ["status" => "error", "message" => "Error al procesar la reserva."];
     }
@@ -79,6 +84,17 @@ class Reserva
                 FROM reservas r
                 JOIN usuarios u ON r.usuario_id = u.id
                 JOIN instalaciones i ON r.instalacion_id = i.id
+                ORDER BY r.fecha DESC, r.hora_inicio DESC";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    // Obtener solo las reservas confirmadas (público, sin datos de usuario)
+    public function listarReservasConfirmadas() {
+        $query = "SELECT r.id, r.instalacion_id, r.fecha, r.hora_inicio, r.estado 
+                FROM " . $this->table . " r
+                WHERE r.estado = 'confirmada'
                 ORDER BY r.fecha DESC, r.hora_inicio DESC";
         
         $stmt = $this->db->prepare($query);

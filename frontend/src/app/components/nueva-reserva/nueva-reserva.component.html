@@ -14,8 +14,11 @@
           <label class="form-label fw-bold">¿Qué día quieres venir?</label>
           <div class="input-group">
             <span class="input-group-text bg-white"><i class="bi bi-calendar-event"></i></span>
-            <input type="date" formControlName="fecha" class="form-control form-control-lg border-start-0">
+            <input type="date" formControlName="fecha" class="form-control form-control-lg border-start-0" [min]="fechaMinima">
           </div>
+          <small class="text-danger d-block mt-1" *ngIf="reservaForm.get('fecha')?.hasError('fechaPasada') && reservaForm.get('fecha')?.touched">
+            <i class="bi bi-exclamation-circle me-1"></i>No puedes hacer reservas en fechas pasadas
+          </small>
         </div>
 
         <div class="mb-4">
@@ -24,21 +27,21 @@
             <span class="input-group-text bg-white"><i class="bi bi-alarm"></i></span>
             <select formControlName="hora" class="form-select form-select-lg border-start-0">
               <option value="">Selecciona un bloque de 1h...</option>
-              <option value="09:00">09:00 - 10:00</option>
-              <option value="10:00">10:00 - 11:00</option>
-              <option value="11:00">11:00 - 12:00</option>
-              <option value="12:00">12:00 - 13:00</option>
-              <option value="13:00">13:00 - 14:00</option>
-              <option value="14:00">14:00 - 15:00</option>
-              <option value="17:00">17:00 - 18:00</option>
-              <option value="18:00">18:00 - 19:00</option>
-              <option value="19:00">19:00 - 20:00</option>
-              <option value="20:00">20:00 - 21:00</option>
-              <option value="21:00">21:00 - 22:00</option>
+              <option value="09:00" [disabled]="estaOcupada('09:00')">09:00 - 10:00 <span *ngIf="estaOcupada('09:00')">(Ocupada)</span></option>
+              <option value="10:00" [disabled]="estaOcupada('10:00')">10:00 - 11:00 <span *ngIf="estaOcupada('10:00')">(Ocupada)</span></option>
+              <option value="11:00" [disabled]="estaOcupada('11:00')">11:00 - 12:00 <span *ngIf="estaOcupada('11:00')">(Ocupada)</span></option>
+              <option value="12:00" [disabled]="estaOcupada('12:00')">12:00 - 13:00 <span *ngIf="estaOcupada('12:00')">(Ocupada)</span></option>
+              <option value="13:00" [disabled]="estaOcupada('13:00')">13:00 - 14:00 <span *ngIf="estaOcupada('13:00')">(Ocupada)</span></option>
+              <option value="14:00" [disabled]="estaOcupada('14:00')">14:00 - 15:00 <span *ngIf="estaOcupada('14:00')">(Ocupada)</span></option>
+              <option value="17:00" [disabled]="estaOcupada('17:00')">17:00 - 18:00 <span *ngIf="estaOcupada('17:00')">(Ocupada)</span></option>
+              <option value="18:00" [disabled]="estaOcupada('18:00')">18:00 - 19:00 <span *ngIf="estaOcupada('18:00')">(Ocupada)</span></option>
+              <option value="19:00" [disabled]="estaOcupada('19:00')">19:00 - 20:00 <span *ngIf="estaOcupada('19:00')">(Ocupada)</span></option>
+              <option value="20:00" [disabled]="estaOcupada('20:00')">20:00 - 21:00 <span *ngIf="estaOcupada('20:00')">(Ocupada)</span></option>
+              <option value="21:00" [disabled]="estaOcupada('21:00')">21:00 - 22:00 <span *ngIf="estaOcupada('21:00')">(Ocupada)</span></option>
             </select>
           </div>
           <small class="text-muted d-block mt-2">
-            <i class="bi bi-info-circle me-1"></i>Solo se permiten reservas en horas en punto.
+            <i class="bi bi-info-circle me-1"></i>Solo se permiten reservas en horas en punto. Las opciones en <span class="text-danger fw-bold">rojo</span> ya están ocupadas.
           </small>
         </div>
 
@@ -88,7 +91,7 @@
           <label class="form-label small fw-bold text-uppercase">Número de Tarjeta</label>
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
-            <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19">
+            <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="16">
           </div>
         </div>
 

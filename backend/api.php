@@ -13,6 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 session_start();
 require_once 'models/Instalacion.php';
 require_once 'models/Reserva.php';
+require_once 'models/Pago.php';
+require_once 'models/Usuario.php';
+require_once 'models/Mailer.php';
 
 function checkAuth() {
     if (!isset($_SESSION['usuario_id'])) {
@@ -25,6 +28,9 @@ function checkAuth() {
 $action = $_GET['action'] ?? '';
 $reservaModel = new Reserva();
 $instalacionModel = new Instalacion();
+$pagoModel = new Pago();
+$usuarioModel = new Usuario();
+$mailer = new Mailer();
 
 // Leemos el JSON una sola vez
 $data = json_decode(file_get_contents("php://input"));
@@ -79,7 +85,9 @@ switch($action) {
     // Usamos el método del modelo para marcar como cancelada
     $exito = $reservaModel->cancelar($id_reserva);
     if ($exito) {
-        echo json_encode(["status" => "success", "message" => "Reserva cancelada"]);
+        // Reembolsamos el pago automáticamente
+        $pagoModel->reembolsarPorReserva($id_reserva);
+        echo json_encode(["status" => "success", "message" => "Reserva cancelada y pago reembolsado"]);
     } else {
         http_response_code(500);
         echo json_encode(["status" => "error", "message" => "No se pudo cancelar la reserva"]);
@@ -95,6 +103,41 @@ switch($action) {
         }
         // Limpiamos la lógica: el modelo ya tiene la query, no hace falta repetirla aquí
         echo json_encode($reservaModel->listarTodasAdmin());
+        break;
+
+    case 'obtener_reservas_confirmadas':
+        // Endpoint público (sin requerir autenticación) para ver qué está ocupado
+        echo json_encode($reservaModel->listarReservasConfirmadas());
+        break;
+
+    case 'estadisticas':
+        checkAuth();
+        if ($_SESSION['rol'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode(["message" => "Acceso denegado"]);
+            exit;
+        }
+        $stats = $pagoModel->obtenerEstadisticas();
+        // Debug: Mostrar si hay errores
+        if (isset($stats['error'])) {
+            http_response_code(500);
+        }
+        echo json_encode($stats);
+        break;
+
+    case 'debug_pagos':
+        checkAuth();
+        if ($_SESSION['rol'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode(["message" => "Acceso denegado"]);
+            exit;
+        }
+        // Endpoint de debug: mostrar todos los pagos
+        echo json_encode([
+            'total_pagos' => $pagoModel->contarTodos(),
+            'pagos' => $pagoModel->listarTodos(),
+            'fecha_actual' => date('Y-m-d H:i:s')
+        ]);
         break;
 
     case 'listar_todos_usuarios':
@@ -299,50 +342,67 @@ case 'eliminar_pista':
         break;
 
     case 'crear_reserva':
-    checkAuth();
-    
-    // Forzamos la limpieza del buffer para que solo salga el JSON
-    if (ob_get_length()) ob_clean();
-
-    $data = json_decode(file_get_contents("php://input"), true);
-    
-    // PRUEBA DE FUEGO: 
-    // Si $_SESSION['usuario_id'] está vacío, el sistema fallará.
-    // Vamos a ver qué tiene la sesión realmente.
-    $user_id = $_SESSION['usuario_id'] ?? $_SESSION['id'] ?? null;
-    
-    if (!$user_id) {
-        // Si entra aquí, es que el Login NO guardó bien el ID o la sesión se perdió
-        echo json_encode([
-            "status" => "error", 
-            "message" => "No hay usuario en la sesión. Sesión actual: " . json_encode($_SESSION)
-        ]);
-        exit;
-    }
-
-    $instalacion_id = $data['instalacion_id'];
-    $fecha = $data['fecha'];
-    $hora_inicio = $data['hora']; 
-
-    try {
-        // 3. Usamos los nombres exactos de tu tabla: usuario_id, instalacion_id, fecha, hora_inicio, estado
-        $stmt = $pdo->prepare("INSERT INTO reservas (usuario_id, instalacion_id, fecha, hora_inicio, estado) VALUES (?, ?, ?, ?, 'confirmada')");
-        $stmt->execute([
-            $user_id, 
-            $instalacion_id, 
-            $fecha, 
-            $hora_inicio, 
-            'confirmada'
-        ]);
+        checkAuth();
         
-        echo json_encode(["status" => "success", "message" => "Reserva guardada correctamente"]);
-        exit; // Cerramos aquí para evitar que se envíe nada más
+        $instalacion_id = $data->instalacion_id ?? null;
+        $fecha = $data->fecha ?? null;
+        $hora_inicio = $data->hora_inicio ?? null;
+        
+        if (!$instalacion_id || !$fecha || !$hora_inicio) {
+            http_response_code(400);
+            echo json_encode([
+                "status" => "error", 
+                "message" => "Datos incompletos: se requiere instalacion_id, fecha y hora_inicio"
+            ]);
+            break;
+        }
+        
+        // 1. Crear la reserva
+        $resultado = $reservaModel->crear($_SESSION['usuario_id'], $instalacion_id, $fecha, $hora_inicio);
+        
+        // 2. Si la reserva fue exitosa, registrar el pago
+        if ($resultado['status'] === 'success' && isset($resultado['reserva_id'])) {
+            // Obtener el precio de la instalación para el pago
+            $instalacion = $instalacionModel->obtenerPorId($instalacion_id);
+            $importe = $instalacion['precio_hora'] ?? 0;
+            
+            // Registrar el pago automáticamente
+            $resultadoPago = $pagoModel->registrar(
+                $resultado['reserva_id'], 
+                $importe, 
+                'tarjeta_credito', 
+                'completado'
+            );
+            
+            // Agregamos la referencia del pago a la respuesta
+            if ($resultadoPago['status'] === 'success') {
+                $resultado['pago'] = [
+                    'referencia' => $resultadoPago['referencia'],
+                    'importe' => $importe
+                ];
+            }
 
-    } catch (PDOException $e) {
-        // 4. Si la base de datos da error (ej: el usuario no existe), lo enviamos como JSON
-        echo json_encode(["status" => "error", "message" => "Error de Base de Datos: " . $e->getMessage()]);
-        exit;
-    }
+            // 3. Enviar correo de confirmación
+            $usuario = $usuarioModel->obtenerPorId($_SESSION['usuario_id']);
+            if ($usuario) {
+                $reserva_data = [
+                    'id' => $resultado['reserva_id'],
+                    'fecha' => $fecha,
+                    'hora_inicio' => $hora_inicio
+                ];
+                
+                $mailer->enviarConfirmacionReserva(
+                    $usuario['email'],
+                    $usuario['nombre'],
+                    $reserva_data,
+                    $instalacion['nombre'],
+                    $resultado['pago'] ?? null
+                );
+            }
+        }
+        
+        echo json_encode($resultado);
+        break;
 }
 
 ?>

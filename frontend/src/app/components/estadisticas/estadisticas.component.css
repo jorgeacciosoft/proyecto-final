@@ -1,0 +1,124 @@
+.card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.progress {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  transition: width 0.6s ease;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table thead th {
+  padding: 1rem 0.75rem !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.table tbody td {
+  padding: 0.85rem 0.75rem !important;
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.bi {
+  vertical-align: middle;
+}
+
+.card div {
+  opacity: 1 !important;
+  color: #000 !important;
+  font-weight: 500 !important;
+}
+
+.card i {
+  color: #000 !important;
+}
+
+.card h2 {
+  color: #000 !important;
+}
+
+.texto-blanco-card {
+  color: #ffffff !important;
+}
+/* Botón volver - ancho completo solo en móvil */
+.btn-back {
+  white-space: nowrap;
+}
+
+
+@media (max-width: 576px) {
+  .btn-back {
+    width: 100%;
+  }
+}
+
+/* Responsive para móvil */
+@media (max-width: 576px) {
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .card-body {
+    padding: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h5 {
+    font-size: 1rem;
+  }
+
+  .btn-sm {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+  }
+
+  /* Mejorar tabla en móvil */
+  .table-sm th {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.85rem;
+  }
+
+  .table-sm td {
+    padding: 0.6rem 0.5rem !important;
+    font-size: 0.85rem;
+  }
+
+  .text-nowrap {
+    white-space: normal !important;
+  }
+
+}

@@ -34,6 +34,7 @@ switch($action) {
         if($user) {
             $_SESSION['usuario_id'] = $user['id'];
             $_SESSION['rol'] = $user['rol'];
+            $_SESSION['nombre'] = $user['nombre'];
             echo json_encode(["status" => "success", "user" => $user]);
         } else {
             // Si llega aquí, el email no existe o la password no coincide
@@ -66,7 +67,11 @@ switch($action) {
 
     case 'verificar_sesion':
         if(isset($_SESSION['usuario_id'])) {
-            echo json_encode(["isLoggedIn" => true, "rol" => $_SESSION['rol']]);
+            echo json_encode([
+                "isLoggedIn" => true, 
+                "rol" => $_SESSION['rol'],
+                "nombre" => $_SESSION['nombre'] ?? ''
+            ]);
         } else {
             echo json_encode(["isLoggedIn" => false]);
         }

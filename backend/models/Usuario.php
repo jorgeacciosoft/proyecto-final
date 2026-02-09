@@ -84,5 +84,13 @@ class Usuario {
         $stmt->execute([':email' => trim($email)]);
         return $stmt->fetchColumn() > 0;
     }
+
+    // Obtener usuario por ID
+    public function obtenerPorId($usuario_id) {
+        $query = "SELECT id, nombre, email, rol FROM " . $this->table . " WHERE id = :id LIMIT 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':id' => $usuario_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>

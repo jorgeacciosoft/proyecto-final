@@ -1,0 +1,33 @@
+.cancelada {
+  color: #c32130;
+}
+
+.confirmada {
+  color: #198754;
+}
+
+
+@media (min-width: 768px) {
+
+}
+
+/* Responsive solo para móvil */
+@media (max-width: 768px) {
+  .card-header > div {
+    flex-direction: column;
+  }
+
+  .card-header .d-flex:last-child {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .card-header .btn-info {
+    width: 100%;
+  }
+
+  .card-header .badge {
+    width: 100%;
+    text-align: center;
+  }
+}

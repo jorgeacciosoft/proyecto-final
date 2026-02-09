@@ -1,8 +1,15 @@
 <div class="container-fluid py-4">
   <div class="card border-0 shadow-sm">
-    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Panel de Administración Central</h5>
-      <span class="badge bg-warning text-dark px-3">Sesión de Administrador</span>
+    <div class="card-header bg-dark text-white">
+      <div class="d-flex justify-content-between align-items-center gap-2">
+        <h5 class="mb-0">Panel de Administración Central</h5>
+        <div class="d-flex gap-2 align-items-center">
+          <a routerLink="/estadisticas" class="btn btn-sm btn-info">
+            <i class="bi bi-graph-up-arrow me-1"></i>Ver Estadísticas
+          </a>
+          <span class="badge bg-warning text-dark px-3">Sesión de Administrador</span>
+        </div>
+      </div>
     </div>
 
     <div class="card-body">
@@ -46,13 +53,13 @@
                   <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
                   <td>{{ r.hora_inicio }}</td>
                   <td>
-                    <span [class]="r.estado === 'confirmada' ? 'badge bg-success-subtle text-success' : 'badge bg-danger-subtle text-danger'">
+                    <span [class]="r.estado === 'confirmada' ? 'badge confirmada' : 'badge cancelada'">
                       {{ r.estado | uppercase }}
                     </span>
                   </td>
                   <td *ngIf="hayReservasActivas" class="text-end">
                     <button *ngIf="r.estado === 'confirmada'" (click)="eliminarReservaAdmin(r.id)" class="btn btn-sm btn-outline-danger">
-                      <i class="bi bi-trash"></i> Cancelar
+                      <i aria-hidden="true" class="bi bi-trash"></i> Cancelar
                     </button>
                   </td>
                 </tr>

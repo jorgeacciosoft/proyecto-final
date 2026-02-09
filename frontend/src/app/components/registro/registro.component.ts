@@ -27,24 +27,61 @@ export class RegistroComponent {
   }
 
   confirmarRegistro() {
-  if (this.registroForm.valid) {
-    this.authService.registrarUsuario(this.registroForm.value).subscribe({
+    if (this.registroForm.valid) {
+      const credentials = { ...this.registroForm.value };
+
+      this.authService.registrarUsuario(this.registroForm.value).subscribe({
+        next: (res) => {
+          if (res.status === 'success') {
+            // Mostrar un mensaje rápido de bienvenida
+            Swal.fire({
+              title: '¡Cuenta creada!',
+              html: '<p>Bienvenido a la plataforma</p><p class="text-muted small">Redirigiendo...</p>',
+              icon: 'success',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+                // Hacer login automático después de 1 segundo
+                setTimeout(() => {
+                  this.loginAutomatico(credentials);
+                }, 1000);
+              }
+            });
+          } else {
+            Swal.fire('Atención', res.message || 'Este correo ya está registrado', 'warning');
+          }
+        },
+        error: (err) => {
+          const mensajeError = err.error?.message || 'No se pudo conectar con el servidor';
+          Swal.fire('Error', mensajeError, 'error');
+        }
+      });
+    }
+  }
+
+  loginAutomatico(credentials: any) {
+    this.authService.login(credentials).subscribe({
       next: (res) => {
-        // Creación exitosa, mostramos mensaje y redirigimos a login
         if (res.status === 'success') {
-          Swal.fire('¡Cuenta creada!', 'Ya puedes iniciar sesión con tus credenciales.', 'success')
-            .then(() => this.router.navigate(['/login']));
+          Swal.close();
+          Swal.fire({
+            title: '¡Bienvenido!',
+            text: `Sesión iniciada correctamente`,
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            // Redireccionar a la app (listado de pistas)
+            this.router.navigate(['/pistas']);
+          });
         } else {
-          // Si el backend detecta el email duplicado y manda un mensaje de error
-          Swal.fire('Atención', res.message || 'Este correo ya está registrado', 'warning');
+          Swal.fire('Error', 'No se pudo iniciar sesión automáticamente', 'error');
         }
       },
       error: (err) => {
-        // Manejo de errores de red o errores 4xx/5xx del servidor
-        const mensajeError = err.error?.message || 'No se pudo conectar con el servidor';
-        Swal.fire('Error', mensajeError, 'error');
+        Swal.fire('Error', 'No se pudo iniciar sesión automáticamente', 'error');
+        console.error('Error en login automático:', err);
       }
     });
   }
-}
 }

@@ -1,0 +1,53 @@
+.navbar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .navbar-overlay {
+    display: block;
+  }
+}
+
+.navbar {
+  z-index: 1041;
+}
+
+.nav-text {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+}
+
+@media (max-width: 991px) {
+  .nav-text {
+    margin: 0.5rem 0 !important;
+    display: block;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .nav-text {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.9rem;
+  }
+
+  .btn-primary {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+  }
+}

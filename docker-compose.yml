@@ -23,6 +23,6 @@ services:
       - ./backend:/var/www/html
     depends_on:
       - db
-    # Instalamos la extensión PDO MySQL necesaria para tu rúbrica
+    # Instalamos las extensiones necesarias
     command: >
-      sh -c "docker-php-ext-install pdo pdo_mysql && apache2-foreground"
+      sh -c "docker-php-ext-install pdo pdo_mysql sockets && apache2-foreground"

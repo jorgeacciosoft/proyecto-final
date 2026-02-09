@@ -83,6 +83,16 @@ export class DataService {
   }
 
   obtenerInstalacionPorId(id: number): Observable<any> {
-  return this.http.get(`${this.API_URL}?action=obtener_instalacion&id=${id}`, { withCredentials: true });
-}
+    return this.http.get(`${this.API_URL}?action=obtener_instalacion&id=${id}`, { withCredentials: true });
+  }
+
+  // Obtener estadísticas de ingresos (para admin)
+  obtenerEstadisticas(): Observable<any> {
+    return this.http.get(`${this.API_URL}?action=estadisticas`, { withCredentials: true });
+  }
+
+  // Obtener todas las reservas confirmadas
+  obtenerTodasReservas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}?action=obtener_reservas_confirmadas`);
+  }
 }

@@ -14,6 +14,8 @@ export class AuthService {
   private loggedIn = new BehaviorSubject<boolean>(false);
   // Este guardará el rol (admin/user)
   private userRole = new BehaviorSubject<string>('');
+  // Este guardará el nombre del usuario
+  private userName = new BehaviorSubject<string>('');
 
   constructor(private http: HttpClient) {
     this.checkSession().subscribe(); // Comprobar sesión al cargar la app
@@ -22,6 +24,7 @@ export class AuthService {
   // Getters para que los componentes se suscriban a los cambios
   isLoggedIn$ = this.loggedIn.asObservable();
   role$ = this.userRole.asObservable();
+  userName$ = this.userName.asObservable();
 
   login(credentials: any): Observable<any> {
     return this.http.post(`${this.AUTH_URL}?action=login`, credentials, { withCredentials: true }).pipe(
@@ -29,6 +32,7 @@ export class AuthService {
         if (res.status === 'success') {
           this.loggedIn.next(true);
           this.userRole.next(res.user.rol);
+          this.userName.next(res.user.nombre || '');
         }
       })
     );
@@ -43,6 +47,7 @@ export class AuthService {
       tap((res: any) => {
         this.loggedIn.next(res.isLoggedIn);
         this.userRole.next(res.rol || '');
+        this.userName.next(res.nombre || '');
       })
     );
   }
@@ -52,6 +57,7 @@ export class AuthService {
       tap(() => {
         this.loggedIn.next(false);
         this.userRole.next('');
+        this.userName.next('');
       })
     );
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -15,6 +15,8 @@ export class NavbarComponent implements OnInit {
   isLoggedIn: boolean = false;
   isMenuCollapsed: boolean = true;
   isAdmin: boolean = false;
+  userName: string = '';
+  @ViewChild('navbar') navbar?: ElementRef;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -22,6 +24,23 @@ export class NavbarComponent implements OnInit {
     // Nos suscribimos a los cambios de estado
     this.authService.isLoggedIn$.subscribe(status => this.isLoggedIn = status);
     this.authService.role$.subscribe(role => this.isAdmin = (role === 'admin'));
+    this.authService.userName$.subscribe(nombre => this.userName = nombre);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // Solo cerrar en móvil (cuando navbar está colapsado)
+    const isSmallScreen = window.innerWidth < 992;
+    if (isSmallScreen && !this.isMenuCollapsed && this.navbar) {
+      const target = event.target as HTMLElement;
+      if (!this.navbar.nativeElement.contains(target)) {
+        this.isMenuCollapsed = true;
+      }
+    }
+  }
+
+  closeMenu() {
+    this.isMenuCollapsed = true;
   }
 
   onLogout() {
