@@ -2,8 +2,15 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top" #navbar>
   <div class="container">
-    <a class="navbar-brand fw-bold" routerLink="/" (click)="isMenuCollapsed = true">TodoReservas</a>
-
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" routerLink="/" (click)="isMenuCollapsed = true">
+  <img
+    src="assets/img/todo-reservas.png"
+    alt="Logo TodoReservas"
+    width="50"
+    height="50"
+    style="object-fit: contain; image-rendering: -webkit-optimize-contrast;"
+    class="d-inline-block">
+</a>
     <button aria-label="Menú Hamburguesa" class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
       <span class="navbar-toggler-icon"></span>
     </button>

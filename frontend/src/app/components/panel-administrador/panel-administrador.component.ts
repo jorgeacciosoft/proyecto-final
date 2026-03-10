@@ -176,6 +176,7 @@ eliminarReservaAdmin(id: number) {
         </input>
       `,
       showCancelButton: true,
+      cancelButtonText: 'Cancelar',
       confirmButtonText: 'Crear',
       preConfirm: () => {
         const nombre = (document.getElementById('swal-nombre') as HTMLInputElement).value;

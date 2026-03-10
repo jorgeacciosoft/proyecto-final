@@ -1,5 +1,4 @@
 services:
-  # Contenedor de Base de Datos
   db:
     image: mysql:8.0
     container_name: todo-reservas-db
@@ -10,11 +9,10 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - ./backend/sql:/docker-entrypoint-initdb.d # Carga automática del script SQL
+      - ./backend/sql:/docker-entrypoint-initdb.d
 
-  # Contenedor de PHP + Apache (Backend)
   backend:
-    image: php:8.2-apache
+    build: ./backend
     container_name: todo-reservas-backend
     restart: always
     ports:
@@ -23,6 +21,22 @@ services:
       - ./backend:/var/www/html
     depends_on:
       - db
-    # Instalamos las extensiones necesarias
-    command: >
-      sh -c "docker-php-ext-install pdo pdo_mysql sockets && apache2-foreground"
+
+  frontend:
+    image: node:20-alpine
+    container_name: todo-reservas-frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "4200:4200"
+    command: sh -c "npm install && npx ng serve --host 0.0.0.0"
+    depends_on:
+      - backend
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: todo-reservas-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"

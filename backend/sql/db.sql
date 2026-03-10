@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS `instalaciones` (
 
 -- Volcando datos para la tabla todo_reservas.instalaciones: ~3 rows (aproximadamente)
 INSERT INTO `instalaciones` (`id`, `nombre`, `tipo`, `precio_hora`, `descripcion`, `imagen_url`) VALUES
-	(1, 'Pista Central', 'Padel', 12.50, 'Pista de Pijo Padel', '1770365825_pijo-padel.jpeg'),
-	(2, 'Pista Azul', 'Padel', 15.00, 'Pista de Open World Tour Padel', '1770366001_Pista-de-padel-Panoramic-cesped-azul.jpg'),
-	(3, 'Campo Municipal', 'Fútbol', 30.00, 'Campo municipal de Aguadulce', 'null');
+	(1, 'Pista Central', 'Padel', 12.50, 'Pista de Pijo Padel', 'pista-tenis.webp'),
+	(2, 'Pista Azul', 'Padel', 15.00, 'Pista de Open World Tour Padel', 'pista-azul.webp'),
+	(3, 'Campo Municipal', 'Fútbol', 30.00, 'Campo municipal de Aguadulce', 'campo-aguadulce.webp');
 
 -- Volcando estructura para tabla todo_reservas.pagos
 CREATE TABLE IF NOT EXISTS `pagos` (
