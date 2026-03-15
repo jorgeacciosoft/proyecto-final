@@ -23,14 +23,11 @@ services:
       - db
 
   frontend:
-    image: node:20-alpine
+    build: ./frontend
     container_name: todo-reservas-frontend
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
+    restart: always
     ports:
-      - "4200:4200"
-    command: sh -c "npm install && npx ng serve --host 0.0.0.0"
+      - "4200:80"
     depends_on:
       - backend
 

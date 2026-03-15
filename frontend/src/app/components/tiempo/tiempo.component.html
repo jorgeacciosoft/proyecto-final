@@ -1,0 +1,69 @@
+<!-- Botón flotante -->
+<button class="weather-fab" (click)="toggleWidget()" [title]="abierto ? 'Cerrar tiempo' : 'Ver el tiempo'">
+  <span *ngIf="!abierto">🌤️</span>
+  <span *ngIf="abierto">✕</span>
+</button>
+
+<!-- Panel flotante -->
+<div class="weather-panel" [class.abierto]="abierto">
+  <div class="weather-panel-header">
+    <span>🌍 El tiempo</span>
+  </div>
+
+  <div class="weather-panel-body">
+    <!-- Buscador -->
+    <div class="weather-search">
+      <input
+        type="text"
+        [(ngModel)]="ciudad"
+        placeholder="Ciudad o lugar..."
+        (keydown.enter)="buscar()"
+        class="weather-input"
+      />
+      <button (click)="buscar()" [disabled]="cargando" class="weather-btn-buscar">
+        <span *ngIf="cargando" class="spinner-border spinner-border-sm"></span>
+        <span *ngIf="!cargando">Buscar</span>
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error" class="weather-error">{{ error }}</div>
+
+    <!-- Resultado -->
+    <div *ngIf="weather" class="weather-resultado">
+      <div class="weather-ciudad">📍 {{ weather.ciudad }}</div>
+
+      <div class="weather-principal">
+        <span class="weather-icono">{{ weather.icono }}</span>
+        <div>
+          <div class="weather-temp">{{ weather.temperatura }}°C</div>
+          <div class="weather-desc">{{ weather.descripcion }}</div>
+        </div>
+      </div>
+
+      <div class="weather-detalles">
+        <div class="weather-detalle">
+          <span>🌡️</span>
+          <span>Sens. {{ weather.sensacion }}°C</span>
+        </div>
+        <div class="weather-detalle">
+          <span>💨</span>
+          <span>{{ weather.viento }} km/h</span>
+        </div>
+        <div class="weather-detalle" *ngIf="weather.lluvia > 0">
+          <span>🌧️</span>
+          <span>{{ weather.lluvia }} mm</span>
+        </div>
+      </div>
+
+      <div *ngIf="weather.lluvia > 0" class="weather-aviso">
+        ⚠️ Condiciones adversas
+      </div>
+    </div>
+
+    <!-- Estado inicial -->
+    <div *ngIf="!weather && !cargando && !error" class="weather-placeholder">
+      Escribe una ciudad para consultar el tiempo
+    </div>
+  </div>
+</div>
